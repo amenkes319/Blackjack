@@ -23,7 +23,8 @@ public class Blackjack extends Application {
 	 */
 	@Override
 	public void start(Stage primaryStage) {
-		
+		primaryStage.show();
+		primaryStage.close();
 	}
 	
 	public static void main(String[] args) {
