@@ -1,13 +1,12 @@
 package blackjack.game;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Hand {
 
 	/** The stack of cards of the hand. */
-	private Deque<Card> cards;
+	private List<Card> cards;
 	
 	/**
 	 * The total value of the hand.
@@ -15,16 +14,30 @@ public class Hand {
 	 */
 	private int value;
 	
+	/**
+	 * Create new empty hand object
+	 */
 	public Hand() {
-		cards = new ArrayDeque<>();
+		cards = new ArrayList<>();
 		value = 0;
+	}
+	
+	/**
+	 * Create new hand with cards in it
+	 * @param cardArr cards to add to hand
+	 */
+	public Hand(Card... cardArr) {
+		this();
+		for (Card card : cardArr) {
+			addCard(card);
+		}
 	}
 	
 	/**
 	 * Stack of cards that make up the hand.
 	 * @return Deque of cards
 	 */
-	public Deque<Card> getCards() {
+	public List<Card> getCards() {
 		return cards;
 	}
 	
@@ -38,9 +51,17 @@ public class Hand {
 	}
 	
 	/**
+	 * Returns size of hand
+	 * @return size of hand
+	 */
+	public int size() {
+		return cards.size();
+	}
+	
+	/**
 	 * Returns whether the hand is soft or not
 	 * 
-	 * @return True if the hand is soft, false otherwise
+	 * @return {@code true} if the hand is soft
 	 */
 	public boolean isSoft() {
 		return checkSoft() != null;
@@ -52,7 +73,12 @@ public class Hand {
 	 * @param card Card to be added
 	 */
 	public void addCard(Card card) {
-		cards.push(card);
+		// Reset ace if it was moved from one hand to this hand
+		if (card.getName() == "Ace" && !card.isSoft()) {
+			card.makeHard();
+		}
+		
+		cards.add(card);
 		value += card.getValue();
 		
 		if (value > 21) {
@@ -65,11 +91,31 @@ public class Hand {
 	}
 	
 	/**
+	 * Removes card from hand
+ 	 * @param card card to remove
+	 * @return {@code true} if card is contained in the list
+	 */
+	public boolean removeCard(Card card) {
+		boolean result = cards.remove(card);
+		updateValue();
+		return result;
+	}
+	
+	/**
 	 * Removes all cards from the hand.
 	 */
 	public void clearHand() {
 		cards.clear();
 		updateValue();
+	}
+
+	/**
+	 * Returns whether the value of the hand is over 21
+	 * 
+	 * @return True if the value is over 21, false otherwise
+	 */
+	public boolean isBust() {
+		return getValue() > 21;
 	}
 	
 	/**
@@ -88,14 +134,12 @@ public class Hand {
 	 * @return Most recently added soft card if hand is soft, null otherwise
 	 */
 	private Card checkSoft() {
-		Card card;
-		
-		Iterator<Card> it = cards.iterator();
-		while (it.hasNext()) {
-			if ((card = it.next()).isSoft()) {
+		for (Card card : cards) {
+			if (card.isSoft()) {
 				return card;
 			}
 		}
+		
 		return null;
 	}
 	

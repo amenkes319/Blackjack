@@ -83,9 +83,9 @@ public class Card {
 	}
 
 	/**
-	 * Returns wheter the card soft or not.
+	 * Returns whether the card is soft or not.
 	 * 
-	 * @return True if the card is soft, false otherwise
+	 * @return {@code true} if the card is soft
 	 */
 	public boolean isSoft() {
 		return soft;
@@ -111,12 +111,23 @@ public class Card {
 		}
 	}
 	
+	// General card equals
+//	@Override
+//	public boolean equals(Object other) {
+//		if (other instanceof Card) {
+//			Card c = (Card) other;
+//			return getName().equals(c.getName()) &&
+//				   getSuit() == c.getSuit();
+//		}
+//		return false;
+//	}
+	
+	// Blackjack specific equals, only value
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof Card) {
 			Card c = (Card) other;
-			return getName().equals(c.getName()) &&
-				   getSuit() == c.getSuit();
+			return getValue() == c.getValue() || (getName().equals("Ace") && c.getName().equals("Ace"));
 		}
 		return false;
 	}
@@ -125,7 +136,7 @@ public class Card {
 	 * Returns String representation of the object following the format:
 	 * NAME of SUIT
 	 * 
-	 * @return String represenation of card
+	 * @return String representation of card
 	 */
 	public String toString() {
 		return name + " of " + suit;
