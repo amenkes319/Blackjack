@@ -1,10 +1,15 @@
 package blackjack.game;
 
+import java.util.stream.Stream;
+
 /**
  * The {@code Card} class represents a single card.
  */
 public class Card {
 
+	/**
+	 * The {@code Suit} enum represents the 4 suits.
+	 */
 	public enum Suit {
 		SPADES, HEARTS, DIAMONDS, CLUBS;
 		
@@ -18,10 +23,59 @@ public class Card {
 		}
 	}
 	
+	/**
+	 * The {@code Rank} enum represents the ranks.
+	 */
+	public enum Rank {
+		ACE_LOW(1), TWO(2), THREE(3), FOUR(4), FIVE(5), SIX(6), SEVEN(7), EIGHT(8), NINE(9), TEN(10), JACK(10), QUEEN(10), KING(10), ACE_HIGH(11);
+		
+		/** value of card in the hand */
+		private int val;
+		
+		/**
+		 * Create Rank enum of value {@code val}
+		 * 
+		 * @param val value of the rank
+		 */
+		private Rank(int val) {
+			this.val = val;
+		}
+		
+		/**
+		 * Returns value of the rank
+		 * 
+		 * @return value of the rank
+		 */
+		public int getValue() {
+			return val;
+		}
+		
+		/**
+		 * Returns instances of Rank values as a stream
+		 * 
+		 * @return Stream of Rank values
+		 */
+		public static Stream<Rank> stream() {
+	        return Stream.of(Rank.values()); 
+	    }
+	
+		/**
+		 * String representation of the rank.
+		 * 
+		 * @return Name of the rank with only the first letter capitalized
+		 */
+		public String toString() {
+			if (this == ACE_LOW || this == ACE_HIGH) {
+				return "Ace";
+			} else {
+				return name().charAt(0) + name().toLowerCase().substring(1);
+			}
+		}
+	}
+	
 	private int value;
 	private Suit suit;
-	private boolean soft;
-	private String name;
+	private Rank rank;
 	
 	/**
 	 * Applies appropriate value to card.
@@ -29,38 +83,9 @@ public class Card {
 	 * @param value Value of card from 1 to 13
 	 * @param suit Suit of card
 	 */
-	public Card(int value, Suit suit) {
-		switch (value) {
-		case 1: // Ace
-			this.value = 11;
-			soft = true;
-			name = "Ace";
-			break;
-			
-		case 11: // Jack
-			this.value = 10;
-			soft = false;
-			name = "Jack";
-			break;
-			
-		case 12: // Queen
-			this.value = 10;
-			soft = false;
-			name = "Queen";
-			break;
-			
-		case 13: // King
-			this.value = 10;
-			soft = false;
-			name = "King";
-			break;
-			
-		default: // 2-10
-			this.value = value;
-			soft = false;
-			name = String.valueOf(value);
-		}
-		
+	public Card(Rank rank, Suit suit) {
+		this.rank = rank;
+		this.value = rank.getValue();
 		this.suit = suit;
 	}
 	
@@ -81,23 +106,14 @@ public class Card {
 	public Suit getSuit() {
 		return suit;
 	}
-
-	/**
-	 * Returns whether the card is soft or not.
-	 * 
-	 * @return {@code true} if the card is soft
-	 */
-	public boolean isSoft() {
-		return soft;
-	}
 	
 	/**
 	 * Returns the name of the card.
 	 * 
 	 * @return Name of the card
 	 */
-	public String getName() {
-		return name;
+	public Rank getRank() {
+		return rank;
 	}
 
 	/**
@@ -105,10 +121,25 @@ public class Card {
 	 * Does nothing if card is not an ace or is already hard
 	 */
 	public void makeHard() {
-		if (soft) {
-			soft = false;
-			value = 1;
+		if (rank == Rank.ACE_HIGH) {
+			rank = Rank.ACE_LOW;
+			value = rank.getValue();
 		}
+	}
+	
+	/**
+	 * Turns a hard ace into a soft ace.
+	 * Does nothing if card is not an ace or is already soft
+	 */
+	public void makeSoft() {
+		if (rank == Rank.ACE_LOW) {
+			rank = Rank.ACE_HIGH;
+			value = rank.getValue();
+		}
+	}
+	
+	public boolean isSoft() {
+		return rank == Rank.ACE_HIGH;
 	}
 	
 	// General card equals
@@ -127,7 +158,10 @@ public class Card {
 	public boolean equals(Object other) {
 		if (other instanceof Card) {
 			Card c = (Card) other;
-			return getValue() == c.getValue() || (getName().equals("Ace") && c.getName().equals("Ace"));
+			Rank r = c.rank;
+			return rank == r ||
+				  (rank == Rank.ACE_LOW && r == Rank.ACE_HIGH) ||
+				  (rank == Rank.ACE_HIGH && r == Rank.ACE_LOW);
 		}
 		return false;
 	}
@@ -139,6 +173,6 @@ public class Card {
 	 * @return String representation of card
 	 */
 	public String toString() {
-		return name + " of " + suit;
+		return rank + " of " + suit;
 	}
 }

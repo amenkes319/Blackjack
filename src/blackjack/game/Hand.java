@@ -73,10 +73,8 @@ public class Hand {
 	 * @param card Card to be added
 	 */
 	public void addCard(Card card) {
-		// Reset ace if it was moved from one hand to this hand
-		if (card.getName() == "Ace" && !card.isSoft()) {
-			card.makeHard();
-		}
+		// Reset if hard ace was moved from one hand to this hand
+		card.makeSoft();
 		
 		cards.add(card);
 		value += card.getValue();
