@@ -41,13 +41,6 @@ public class Blackjack extends Application {
 		Deque<Card> deck = new ArrayDeque<>(deckList);
 //		System.out.println(deck);
 		Player p1 = new Player();
-		p1.hit(new Card(Card.Rank.ACE_HIGH, Card.Suit.CLUBS));
-		p1.hit(new Card(Card.Rank.ACE_HIGH, Card.Suit.SPADES));
-		System.out.println(p1.hands);
-		System.out.println(p1.split(p1.hands.get(0)));
-		System.out.println(p1.hands);
-		System.out.println(p1.hands.get(0).getValue());
-		System.out.println(p1.hands.get(1).getValue());
 		launch(args);
 	}
 }

@@ -9,7 +9,7 @@ public class Player {
 	 * List of hands the player currently holds.
 	 * Size is only greater than 1 if the player splits
 	 * */
-	public List<Hand> hands;
+	private List<Hand> hands;
 	private Hand currentHand;
 	private double balance;
 
