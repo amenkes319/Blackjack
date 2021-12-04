@@ -23,7 +23,7 @@ public class Hand {
 	}
 	
 	/**
-	 * Create new hand with cards in it
+	 * Create new hand with cards in it.
 	 * @param cardArr cards to add to hand
 	 */
 	public Hand(Card... cardArr) {
@@ -43,7 +43,6 @@ public class Hand {
 	
 	/**
 	 * Give total value of the hand.
-	 * 
 	 * @return Value of the hand
 	 */
 	public int getValue() {
@@ -60,7 +59,6 @@ public class Hand {
 	
 	/**
 	 * Returns whether the hand is soft or not
-	 * 
 	 * @return {@code true} if the hand is soft
 	 */
 	public boolean isSoft() {
@@ -69,7 +67,6 @@ public class Hand {
 	
 	/**
 	 * Adds a card to the hand
-	 * 
 	 * @param card Card to be added
 	 */
 	public void addCard(Card card) {
@@ -109,8 +106,7 @@ public class Hand {
 
 	/**
 	 * Returns whether the value of the hand is over 21
-	 * 
-	 * @return True if the value is over 21, false otherwise
+	 * @return {@code true} if the value is over 21
 	 */
 	public boolean isBust() {
 		return getValue() > 21;
@@ -128,7 +124,6 @@ public class Hand {
 	/**
 	 * Checks if the hand is soft by iterating through all the cards
 	 * in the hand starting at the last in.
-	 * 
 	 * @return Most recently added soft card if hand is soft, null otherwise
 	 */
 	private Card checkSoft() {

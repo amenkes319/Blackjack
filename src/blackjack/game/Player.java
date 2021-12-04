@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
-	
 	/** 
 	 * List of hands the player currently holds.
 	 * Size is only greater than 1 if the player splits
-	 * */
-	private List<Hand> hands;
+	 */
+	public List<Hand> hands;
 	private Hand currentHand;
 	private double balance;
 

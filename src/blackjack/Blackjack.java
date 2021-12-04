@@ -30,12 +30,14 @@ public class Blackjack extends Application {
 	
 	public static void main(String[] args) {
 		List<Card> deckList = new ArrayList<>();
+		final int NUM_OF_DECKS = 6;
 		
-		
-		for (Card.Suit suit : Card.Suit.values()) {
-			Card.Rank.stream()
-	        .filter(r -> r != Card.Rank.ACE_LOW)
-	        .forEach(r -> deckList.add(new Card(r, suit)));
+		for (int i = 0; i < NUM_OF_DECKS; i++) {
+			for (Card.Suit suit : Card.Suit.values()) {
+				Card.Rank.stream()
+		        .filter(r -> r != Card.Rank.ACE_LOW)
+		        .forEach(r -> deckList.add(new Card(r, suit)));
+			}
 		}
 		Collections.shuffle(deckList);
 		Deque<Card> deck = new ArrayDeque<>(deckList);

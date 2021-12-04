@@ -15,7 +15,6 @@ public class Card {
 		
 		/**
 		 * String representation of the suit.
-		 * 
 		 * @return Name of the suit with only the first letter capitalized
 		 */
 		public String toString() {
@@ -34,7 +33,6 @@ public class Card {
 		
 		/**
 		 * Create Rank enum of value {@code val}
-		 * 
 		 * @param val value of the rank
 		 */
 		private Rank(int val) {
@@ -43,7 +41,6 @@ public class Card {
 		
 		/**
 		 * Returns value of the rank
-		 * 
 		 * @return value of the rank
 		 */
 		public int getValue() {
@@ -51,8 +48,7 @@ public class Card {
 		}
 		
 		/**
-		 * Returns instances of Rank values as a stream
-		 * 
+		 * Returns instances of Rank values as a stream.
 		 * @return Stream of Rank values
 		 */
 		public static Stream<Rank> stream() {
@@ -61,7 +57,6 @@ public class Card {
 	
 		/**
 		 * String representation of the rank.
-		 * 
 		 * @return Name of the rank with only the first letter capitalized
 		 */
 		public String toString() {
@@ -79,7 +74,6 @@ public class Card {
 	
 	/**
 	 * Applies appropriate value to card.
-	 * 
 	 * @param value Value of card from 1 to 13
 	 * @param suit Suit of card
 	 */
@@ -91,7 +85,6 @@ public class Card {
 	
 	/**
 	 * Returns the value of the card.
-	 * 
 	 * @return Value of the card
 	 */
 	public int getValue() {
@@ -100,7 +93,6 @@ public class Card {
 
 	/**
 	 * Returns the suit of the card.
-	 * 
 	 * @return Suit of the card
 	 */
 	public Suit getSuit() {
@@ -109,7 +101,6 @@ public class Card {
 	
 	/**
 	 * Returns the name of the card.
-	 * 
 	 * @return Name of the card
 	 */
 	public Rank getRank() {
@@ -169,7 +160,6 @@ public class Card {
 	/**
 	 * Returns String representation of the object following the format:
 	 * NAME of SUIT
-	 * 
 	 * @return String representation of card
 	 */
 	public String toString() {
