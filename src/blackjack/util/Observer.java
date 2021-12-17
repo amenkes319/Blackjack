@@ -1,6 +1,6 @@
-package blackjack;
+package blackjack.util;
 
-public interface Observer <T> {
+public interface Observer <Subject> {
 	
 	/**
      * The observed subject calls this method on each observer that has
@@ -20,5 +20,5 @@ public interface Observer <T> {
      * @see <a href="https://sourcemaking.com/design_patterns/observer">the
      * Observer design pattern</a>
      */
-	void update(T t);
+	void update(Subject subject);
 }

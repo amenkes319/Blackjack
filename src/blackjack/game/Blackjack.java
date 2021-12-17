@@ -7,22 +7,45 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import blackjack.Observer;
+import blackjack.util.Observer;
 
 public class Blackjack {
-	private final static int NUMBER_OF_DECKS = 1;
+	
+	/**
+	 * 
+	 * @author Andrew Menkes
+	 *
+	 */
+	public enum GameState {
+		BET, PLAYER_TURN, DEALER_TURN, END_HAND
+	}
+	
+	/**
+	 * Used by observers as Subject data
+	 * 
+	 * @author Andrew Menkes
+	 */
+	public enum DisplayState {
+		DEAL, HIT, STAND, SPLIT, DOUBLE;
+	}
+
+	/**
+	 * Number of decks being used
+	 */
+	private final static int DECK_COUNT = 1;
 	
 	private Dealer dealer;
 	private Player player;
-	private List<Observer<Blackjack>> observers;
+	private GameState state;
+	private List<Observer<DisplayState>> observers;
 	private Deque<Card> deck;
 	
 	public Blackjack() {
 		dealer = new Dealer();
 		player = new Player(100);
+		state = GameState.BET;
 		observers = new LinkedList<>();
-		
-		deck = createDeck(NUMBER_OF_DECKS);
+		deck = createDeck(DECK_COUNT);
 	}
 	
 	/**
@@ -49,30 +72,90 @@ public class Blackjack {
 	 * 
 	 * @param observer
 	 */
-	public void addObserver( Observer<Blackjack> observer ){
+	public void addObserver(Observer<DisplayState> observer) {
         observers.add(observer);
     }
 	
 	/**
 	 * 
 	 */
-	public void notifyObservers() {
-		for (Observer<Blackjack> observer : observers) {
-			observer.update(this);
+	public void notifyObservers(DisplayState data) {
+		for (Observer<DisplayState> observer : observers) {
+			observer.update(data);
 		}
 	}
 	
 	/**
 	 * 
 	 */
-	public void hit() {
+	public void deal() {
+		state = GameState.PLAYER_TURN;
+		deck = createDeck(DECK_COUNT);
+		player.resetHand();
+		dealer.resetHand();
+		player.hit(deck.pop());
+		dealer.hit(deck.pop().setFaceDown(true));
+		player.hit(deck.pop());
+		dealer.hit(deck.pop());
+		notifyObservers(DisplayState.DEAL);
+	}
+	
+	/**
+	 * Flips dealer cards up
+	 */
+	public void showDealerCards() {
+		dealer.showCards();
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return
+	 */
+	public Dealer getDealer() {
+		return dealer;
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @return
+	 */
+	public Player getPlayer() {
+		return player;
+	}
+	
+	/**
+	 * Gets current state of the game
+	 * 
+	 * @return current state of the game
+	 */
+	public GameState getState() {
+		return state;
+	}
+	
+	/**
+	 * 
+	 */
+	public void hitDealer() {
+		dealer.hit(deck.pop());
+		if (dealer.hasBust() || dealer.hasStand()) {
+			
+		}
+		notifyObservers(DisplayState.HIT);
+	}
+	
+	/**
+	 * 
+	 */
+	public void hitPlayer() {
 		player.hit(deck.pop());
 		if (player.hasBust()) {
 			if (!player.nextHand()) {
-				
+				state = GameState.DEALER_TURN;
 			}
 		}
-        notifyObservers();
+        notifyObservers(DisplayState.HIT);
 	}
 	
 	/**
@@ -80,9 +163,9 @@ public class Blackjack {
 	 */
 	public void stand() {
 		if (!player.nextHand()) {
-			
+			state = GameState.DEALER_TURN;
 		}
-		notifyObservers();
+		notifyObservers(DisplayState.STAND);
 	}
 	
 	/**
@@ -91,7 +174,10 @@ public class Blackjack {
 	public boolean doubleDown() {
 		boolean valid = player.doubleDown(deck.pop());
 		if (valid) {
-            notifyObservers();
+			if (!player.nextHand()) {
+				state = GameState.DEALER_TURN;
+			}
+            notifyObservers(DisplayState.DOUBLE);
 		}
 		return valid;
 	}
@@ -104,18 +190,8 @@ public class Blackjack {
 	public boolean split() {
 		boolean valid = player.split();
 		if (valid) {
-			notifyObservers();
+			notifyObservers(DisplayState.SPLIT);
 		}
 		return valid;
-	}
-	
-	@Override
-	public String toString() {
-		// TODO
-		String ret = "";
-		ret += dealer + "\n\n";
-		ret += player;
-		
-		return ret;
 	}
 }

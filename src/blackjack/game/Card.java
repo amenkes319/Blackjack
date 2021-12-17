@@ -76,6 +76,7 @@ public class Card {
 	private int value;
 	private Suit suit;
 	private Rank rank;
+	private boolean faceDown;
 	
 	/**
 	 * Applies appropriate value to card.
@@ -87,6 +88,7 @@ public class Card {
 		this.rank = rank;
 		this.value = rank.getValue();
 		this.suit = suit;
+		this.faceDown = false;
 	}
 	
 	/**
@@ -138,22 +140,35 @@ public class Card {
 		}
 	}
 	
+	/**
+	 * Gets if the card is soft
+	 * 
+	 * @return {@code true} if the card is soft
+	 */
 	public boolean isSoft() {
 		return rank == Rank.ACE_HIGH;
 	}
 	
-	// General card equals
-//	@Override
-//	public boolean equals(Object other) {
-//		if (other instanceof Card) {
-//			Card c = (Card) other;
-//			return getName().equals(c.getName()) &&
-//				   getSuit() == c.getSuit();
-//		}
-//		return false;
-//	}
+	/**
+	 * Gets if the card is face down.
+	 * Only occurs for the dealer
+	 * 
+	 * @return {@code true} if the card is face down
+	 */
+	public boolean isFaceDown() {
+		return faceDown;
+	}
 	
-	// Blackjack specific equals, only value
+	/**
+	 * 
+	 * 
+	 * @param faceDown
+	 */
+	public Card setFaceDown(boolean faceDown) {
+		this.faceDown = faceDown;
+		return this;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof Card) {

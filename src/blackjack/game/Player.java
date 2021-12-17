@@ -1,7 +1,6 @@
 package blackjack.game;
 
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 
 public class Player {
 	
@@ -10,7 +9,7 @@ public class Player {
 	 * Size is only greater than 1 if the player splits
 	 * */
 	private LinkedList<Hand> hands;
-	private Hand currentHand;
+	private int currentIndex;
 	private int balance;
 
 	/**
@@ -19,7 +18,8 @@ public class Player {
 	public Player() {
 		hands = new LinkedList<Hand>();
 		hands.add(new Hand());
-		currentHand = hands.iterator().next();
+		hands.iterator().next();
+		currentIndex = 0;
 		balance = 0;
 	}
 	
@@ -47,23 +47,18 @@ public class Player {
 	 * @return {@code true} if the current hand busted
 	 */
 	public boolean hasBust() {
-		return currentHand.isBust();
+		return hands.get(currentIndex).isBust();
 	}
 	
 	/**
-	 * Changes {@code currentHand} to the next hand
-	 * in the list or null if there are no more hands.
+	 * Moves to the next hand
+	 * Only multiple hands if player split
 	 * 
-	 * @return {@code true} if {@code currentHand} was not made null
+	 * @return {@code true} if there is a next hand
 	 */
 	public boolean nextHand() {
-		try {
-			currentHand = hands.iterator().next();
-			return true;
-		} catch (NoSuchElementException e) {
-			currentHand = null;
-			return false;
-		}
+		currentIndex++;
+		return currentIndex < hands.size()-1;
 	}
 	
 	/**
@@ -72,7 +67,7 @@ public class Player {
 	 * @param card card player receives
 	 */
 	public void hit(Card card) {
-		currentHand.addCard(card);
+		hands.get(currentIndex).addCard(card);
 	}
 	
 	/**
@@ -81,11 +76,11 @@ public class Player {
 	 * @return {@code true} if split was successful
 	 */
 	public boolean split() {
-		if (currentHand.size() == 2) {
-			Card c1 = currentHand.getCards().get(0);
-			Card c2 = currentHand.getCards().get(1);
+		if (hands.get(currentIndex).size() == 2) {
+			Card c1 = hands.get(currentIndex).getCards().get(0);
+			Card c2 = hands.get(currentIndex).getCards().get(1);
 			if (c1.equals(c2)) {
-				if (currentHand.removeCard(c2)) {
+				if (hands.get(currentIndex).removeCard(c2)) {
 					hands.add(new Hand(c2));
 					return true;
 				}
@@ -107,12 +102,12 @@ public class Player {
 	
 	@Override
 	public String toString() {
-		String ret = "Balance: " + balance + "\n";
+		String ret = "Player:\n";
 		if (hands.size() == 1) {
-			ret += "Hand: " + currentHand;
+			ret += "Hand: " + hands.get(0);
 		} else {
 			for (int i = 0; i < hands.size()-1; i++) {
-				ret += "Hand " + i + ": " + hands.get(i) + "\n";
+				ret += "Hand " + (i+1) + ": " + hands.get(i) + "\n";
 			}
 			ret += "Hand " + (hands.size() - 1) + ": " + hands.get(hands.size() - 1);
 		}

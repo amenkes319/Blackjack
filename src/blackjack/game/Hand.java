@@ -143,6 +143,10 @@ public class Hand {
 	
 	@Override
 	public String toString() {
-		return cards.toString().replace("[", "").replace("]", "");
+		String ret = "";
+		for (Card c : cards.stream().filter(card -> !card.isFaceDown()).toList()) {
+			ret += c + ", ";
+		}
+		return ret.length() > 0 ? ret.substring(0, ret.length() - 2) : "No cards face up!";
 	}
 }
