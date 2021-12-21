@@ -24,6 +24,7 @@ public class Hand {
 	
 	/**
 	 * Create new hand with cards in it
+	 * 
 	 * @param cardArr cards to add to hand
 	 */
 	public Hand(Card... cardArr) {
@@ -35,6 +36,7 @@ public class Hand {
 	
 	/**
 	 * Stack of cards that make up the hand.
+	 * 
 	 * @return Deque of cards
 	 */
 	public List<Card> getCards() {
@@ -52,6 +54,7 @@ public class Hand {
 	
 	/**
 	 * Returns size of hand
+	 * 
 	 * @return size of hand
 	 */
 	public int size() {
@@ -64,7 +67,7 @@ public class Hand {
 	 * @return {@code true} if the hand is soft
 	 */
 	public boolean isSoft() {
-		return checkSoft() != null;
+		return checkSoft() != null && getValue() != 21;
 	}
 	
 	/**
@@ -89,7 +92,8 @@ public class Hand {
 	}
 	
 	/**
-	 * Removes card from hand
+	 * Removes card from hand.
+	 * 
  	 * @param card card to remove
 	 * @return {@code true} if card is contained in the list
 	 */
@@ -133,7 +137,7 @@ public class Hand {
 	 */
 	private Card checkSoft() {
 		for (Card card : cards) {
-			if (card.isSoft()) {
+			if (card.isSoft() && !card.isFaceDown()) {
 				return card;
 			}
 		}
@@ -143,6 +147,8 @@ public class Hand {
 	
 	@Override
 	public String toString() {
+		if (cards.isEmpty()) return "No cards!";
+		
 		String ret = "";
 		for (Card c : cards.stream().filter(card -> !card.isFaceDown()).toList()) {
 			ret += c + ", ";

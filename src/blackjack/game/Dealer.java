@@ -40,13 +40,39 @@ public class Dealer {
 		return hand.isBust();
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean hasStand() {
 		return hand.getValue() >= 17 && !hand.isSoft() ||
 			   hand.getValue() >= 18 && hand.isSoft() && !hand.isBust();
 	}
 	
+	/**
+	 * Gets the value of the showing cards only.
+	 * The one shown card if not the dealers turn yet,
+	 * total of cards if all showing.
+	 * 
+	 * @return Total value of face up cards.
+	 */
+	private int showingValue() {
+		int val = 0;
+		for (Card c : hand.getCards()) {
+			if (!c.isFaceDown()) {
+				val += c.getValue();
+			}
+		}
+		return val;
+	}
+	
 	@Override
 	public String toString() {
-		return "Dealer: " + hand;
+		String ret = "Dealer: (";
+		if (hand.isSoft()) {
+			ret += showingValue() - 10 + "/";
+		}
+		ret += showingValue() + ") " + hand;
+		return ret;
 	}
 }

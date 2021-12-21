@@ -174,7 +174,7 @@ public class Card {
 		if (other instanceof Card) {
 			Card c = (Card) other;
 			Rank r = c.rank;
-			return rank == r ||
+			return rank.getValue() == r.getValue() ||
 				  (rank == Rank.ACE_LOW && r == Rank.ACE_HIGH) ||
 				  (rank == Rank.ACE_HIGH && r == Rank.ACE_LOW);
 		}

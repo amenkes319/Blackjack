@@ -3,6 +3,7 @@ package blackjack.ptui;
 import java.util.Scanner;
 
 import blackjack.game.Blackjack;
+import blackjack.game.Blackjack.GameState;
 import blackjack.game.Blackjack.DisplayState;
 import blackjack.util.Observer;
 
@@ -24,25 +25,24 @@ public class PTUI implements Observer<DisplayState> {
 	
 	public void run() {
         try (Scanner userIn = new Scanner(System.in)) {
-//            System.out.print("> ");
-//            System.out.flush();
-            
             mainLoop:
         	while (true) {
-        		if (model.getState() == Blackjack.GameState.BET) {
-        			model.deal();
-        		} else if (model.getState() == Blackjack.GameState.DEALER_TURN) {
-        			model.showDealerCards();
-    				try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-    				model.hitDealer();
-        		} else if (model.getState() == Blackjack.GameState.PLAYER_TURN){
-	                System.out.print("> ");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+        		switch (model.getGameState()) {
+				case BET:
+					System.out.println("\nNew Hand:");
+					model.deal();
+					break;
+				case PLAYER_TURN:
+					System.out.print("> ");
 	                System.out.flush();
 	                String userCmd = userIn.nextLine();
+					
 	                switch (userCmd.toLowerCase()) {
 	                    case "hit":
 	                        model.hitPlayer();
@@ -52,7 +52,7 @@ public class PTUI implements Observer<DisplayState> {
 	                        break;
 	                    case "double":
 	                    	if (!model.doubleDown()) {
-	                    		error("Insufficient funds.", false);
+	                    		error("Cannot double.", false);
 	                    	}
 	                    	break;
 	                    case "split":
@@ -65,6 +65,29 @@ public class PTUI implements Observer<DisplayState> {
 	                    default:
 	                        error("Illegal command.", false);
 	                }
+					break;
+				case DEALER_TURN:
+					if (model.getPlayer().hasBust()) {
+						model.setGameState(GameState.END_HAND);
+					} else {
+						model.hitDealer();
+						if (model.getDealer().hasBust() || model.getDealer().hasStand()) {
+							model.setGameState(GameState.END_HAND);
+						}
+					}
+					break;
+				case END_HAND:
+					if (model.getPlayer().hasBust()) {
+						System.out.println("PLAYER BUST, DEALER WINS");
+					} else { // multiple hands / player not bust
+						if (model.getDealer().hasBust()) {
+							// any player hands not busted wins
+						} else {
+							// compare all hands to dealer
+						}
+					}
+					model.setGameState(GameState.BET);
+					break;
         		}
             }
         }
@@ -72,8 +95,26 @@ public class PTUI implements Observer<DisplayState> {
 	
 	@Override
 	public void update(DisplayState data) {
-		System.out.println(model.getDealer() + "\n");
-		System.out.println(model.getPlayer());
+		System.out.println("\n" + model.getDealer());
+		System.out.println("\n" + model.getPlayer());
+//		switch (data) {
+//		case DEAL:
+//			System.out.println(model.getDealer());
+//			System.out.println("\n" + model.getPlayer());
+//			break;
+//		case DOUBLE:
+//			
+//			break;
+//		case HIT:
+//			
+//			break;
+//		case SPLIT:
+//			
+//			break;
+//		case STAND:
+//			
+//			break;
+//		}
 	}
 	
 	private void error(String message, boolean critical) {
@@ -84,18 +125,5 @@ public class PTUI implements Observer<DisplayState> {
 	public static void main(String[] args) {
 		PTUI ptui = new PTUI();
 		ptui.run();
-
-//		List<Card> deckList = new ArrayList<>();
-//		
-//		for (Card.Suit suit : Card.Suit.values()) {
-//			Card.Rank.stream()
-//	        .filter(r -> r != Card.Rank.ACE_LOW)
-//	        .forEach(r -> deckList.add(new Card(r, suit)));
-//		}
-//		Collections.shuffle(deckList);
-//		Deque<Card> deck = new ArrayDeque<>(deckList);
-//		System.out.println(deck);
-//		Player p1 = new Player();
-//		launch(args);
 	}
 }

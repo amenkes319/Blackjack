@@ -26,7 +26,7 @@ public class Blackjack {
 	 * @author Andrew Menkes
 	 */
 	public enum DisplayState {
-		DEAL, HIT, STAND, SPLIT, DOUBLE;
+		DEAL, HIT, STAND, SPLIT, DOUBLE, PLAYER_WIN, DEALER_WIN;
 	}
 
 	/**
@@ -107,31 +107,23 @@ public class Blackjack {
 		dealer.showCards();
 	}
 	
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public Dealer getDealer() {
 		return dealer;
 	}
 	
-	/**
-	 * 
-	 * 
-	 * @return
-	 */
 	public Player getPlayer() {
 		return player;
 	}
 	
-	/**
-	 * Gets current state of the game
-	 * 
-	 * @return current state of the game
-	 */
-	public GameState getState() {
+	public GameState getGameState() {
 		return state;
+	}
+	
+	public void setGameState(GameState state) {
+		this.state = state;
+		if (state == GameState.DEALER_TURN) {
+			showDealerCards();
+		}
 	}
 	
 	/**
@@ -150,9 +142,11 @@ public class Blackjack {
 	 */
 	public void hitPlayer() {
 		player.hit(deck.pop());
-		if (player.hasBust()) {
-			if (!player.nextHand()) {
-				state = GameState.DEALER_TURN;
+		if (player.hasCurrentBust()) {
+			if (player.hasNextHand()) {
+				player.nextHand(deck.pop());
+			} else {
+				setGameState(GameState.DEALER_TURN);
 			}
 		}
         notifyObservers(DisplayState.HIT);
@@ -162,8 +156,10 @@ public class Blackjack {
 	 * 
 	 */
 	public void stand() {
-		if (!player.nextHand()) {
-			state = GameState.DEALER_TURN;
+		if (player.hasNextHand()) {
+			player.nextHand(deck.pop());
+		} else {
+			setGameState(GameState.DEALER_TURN);
 		}
 		notifyObservers(DisplayState.STAND);
 	}
@@ -174,8 +170,10 @@ public class Blackjack {
 	public boolean doubleDown() {
 		boolean valid = player.doubleDown(deck.pop());
 		if (valid) {
-			if (!player.nextHand()) {
-				state = GameState.DEALER_TURN;
+			if (player.hasNextHand()) {
+				player.nextHand(deck.pop());
+			} else {
+				setGameState(GameState.DEALER_TURN);
 			}
             notifyObservers(DisplayState.DOUBLE);
 		}
@@ -183,13 +181,14 @@ public class Blackjack {
 	}
 	
 	/**
-	 * 
+	 * Split current player hand
 	 * 
 	 * @return {@code true} if split is valid
 	 */
 	public boolean split() {
 		boolean valid = player.split();
 		if (valid) {
+			player.hit(deck.pop());
 			notifyObservers(DisplayState.SPLIT);
 		}
 		return valid;
