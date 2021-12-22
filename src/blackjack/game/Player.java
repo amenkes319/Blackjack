@@ -34,6 +34,20 @@ public class Player {
 	}
 	
 	/**
+	 * Set bet for current hand.
+	 * 
+	 * @param amount Amount to bet.
+	 * @return {@code true} if the bet is valid.
+	 */
+	public boolean bet(int amount) {
+		if (0 < amount && amount <= balance) {
+			hands.get(currentIndex).setBet(amount);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Resets player's hand(s)
 	 */
 	public void resetHand() {

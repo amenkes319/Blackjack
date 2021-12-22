@@ -9,12 +9,17 @@ import java.util.List;
 
 import blackjack.util.Observer;
 
+/**
+ * Class that operates the game
+ * 
+ * @author Andrew Menkes
+ */
 public class Blackjack {
 	
 	/**
-	 * 
+	 * Represents the state of each round
+	 *  
 	 * @author Andrew Menkes
-	 *
 	 */
 	public enum GameState {
 		BET, PLAYER_TURN, DEALER_TURN, END_HAND
@@ -68,16 +73,12 @@ public class Blackjack {
 		return new ArrayDeque<>(deck);
 	}
 	
-	/**
-	 * 
-	 * @param observer
-	 */
 	public void addObserver(Observer<DisplayState> observer) {
         observers.add(observer);
     }
 	
 	/**
-	 * 
+	 * Update all observers
 	 */
 	public void notifyObservers(DisplayState data) {
 		for (Observer<DisplayState> observer : observers) {
@@ -85,14 +86,27 @@ public class Blackjack {
 		}
 	}
 	
-	/**
-	 * 
-	 */
-	public void deal() {
-		state = GameState.PLAYER_TURN;
+	public void reset() {
 		deck = createDeck(DECK_COUNT);
 		player.resetHand();
 		dealer.resetHand();
+	}
+	
+	/**
+	 * Initial bet before the cards are dealt
+	 * 
+	 * @param amount Amount to bet.
+	 * @return {@code true} if the bet is valid.
+	 */
+	public boolean bet(int amount) {
+		return player.bet(amount);
+	}
+	
+	/**
+	 * Deal cards out to player and dealer
+	 */
+	public void deal() {
+		state = GameState.PLAYER_TURN;
 		player.hit(deck.pop());
 		dealer.hit(deck.pop().setFaceDown(true));
 		player.hit(deck.pop());
@@ -132,7 +146,7 @@ public class Blackjack {
 	public void hitDealer() {
 		dealer.hit(deck.pop());
 		if (dealer.hasBust() || dealer.hasStand()) {
-			
+			setGameState(GameState.END_HAND);
 		}
 		notifyObservers(DisplayState.HIT);
 	}

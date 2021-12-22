@@ -15,11 +15,19 @@ public class Hand {
 	private int value;
 	
 	/**
+	 * The amount of money bet on this hand.
+	 * Will increase if player doubles.
+	 * -1 if dealer's hand.
+	 */
+	private int bet;
+	
+	/**
 	 * Create new empty hand object
 	 */
 	public Hand() {
 		cards = new ArrayList<>();
 		value = 0;
+		bet = -1;
 	}
 	
 	/**
@@ -34,26 +42,24 @@ public class Hand {
 		}
 	}
 	
-	/**
-	 * Stack of cards that make up the hand.
-	 * 
-	 * @return Deque of cards
-	 */
 	public List<Card> getCards() {
 		return cards;
 	}
 	
-	/**
-	 * Give total value of the hand.
-	 * 
-	 * @return Value of the hand
-	 */
 	public int getValue() {
 		return value;	
 	}
 	
+	public int getBet() {
+		return bet;
+	}
+	
+	public void setBet(int bet) {
+		this.bet = bet;
+	}
+	
 	/**
-	 * Returns size of hand
+	 * Gets size of hand
 	 * 
 	 * @return size of hand
 	 */

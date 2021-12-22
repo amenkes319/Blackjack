@@ -3,8 +3,8 @@ package blackjack.ptui;
 import java.util.Scanner;
 
 import blackjack.game.Blackjack;
-import blackjack.game.Blackjack.GameState;
 import blackjack.game.Blackjack.DisplayState;
+import blackjack.game.Blackjack.GameState;
 import blackjack.util.Observer;
 
 public class PTUI implements Observer<DisplayState> {
@@ -35,7 +35,21 @@ public class PTUI implements Observer<DisplayState> {
 				
         		switch (model.getGameState()) {
 				case BET:
+					model.reset();
 					System.out.println("\nNew Hand:");
+					int bet;
+					do {
+						System.out.println("Please enter your bet: ");
+						System.out.print("> ");
+						System.out.flush();
+						try {
+							bet = Integer.parseInt(userIn.nextLine());
+							if (model.bet(bet)) {
+								break;
+							}
+						} catch (NumberFormatException e) {}
+					} while(true);
+					
 					model.deal();
 					break;
 				case PLAYER_TURN:
@@ -71,9 +85,6 @@ public class PTUI implements Observer<DisplayState> {
 						model.setGameState(GameState.END_HAND);
 					} else {
 						model.hitDealer();
-						if (model.getDealer().hasBust() || model.getDealer().hasStand()) {
-							model.setGameState(GameState.END_HAND);
-						}
 					}
 					break;
 				case END_HAND:
