@@ -7,31 +7,24 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import blackjack.game.Blackjack.GameState;
 import blackjack.util.Observer;
 
 /**
- * Class that operates the game
+ * Operates the game
  * 
  * @author Andrew Menkes
  */
 public class Blackjack {
 	
-	/**
-	 * Represents the state of each round
-	 *  
-	 * @author Andrew Menkes
-	 */
+	/** Represents the state of each round */
 	public enum GameState {
 		BET, PLAYER_TURN, DEALER_TURN, END_HAND
 	}
 	
-	/**
-	 * Used by observers as Subject data
-	 * 
-	 * @author Andrew Menkes
-	 */
+	/** Used by observers as Subject data */
 	public enum DisplayState {
-		DEAL, HIT, STAND, SPLIT, DOUBLE, PLAYER_WIN, DEALER_WIN;
+		DEAL, HIT, STAND, SPLIT, DOUBLE, PUSH, BLACKJACK_WIN, PLAYER_BUST, PLAYER_WIN, DEALER_WIN
 	}
 
 	/**
@@ -57,7 +50,7 @@ public class Blackjack {
 	 * Create deck of cards
 	 * 
 	 * @param num Number of decks being used
-	 * @return {@code ArrayDeque} of cards
+	 * @return Deck of cards using {@code num} decks
 	 */
 	private Deque<Card> createDeck(int num) {
 		List<Card> deck = new ArrayList<>();
@@ -99,7 +92,7 @@ public class Blackjack {
 	 * @return {@code true} if the bet is valid.
 	 */
 	public boolean bet(int amount) {
-		return player.bet(amount);
+		return player.bet(amount, false);
 	}
 	
 	/**
@@ -121,11 +114,11 @@ public class Blackjack {
 		dealer.showCards();
 	}
 	
-	public Dealer getDealer() {
+	public Dealer dealer() {
 		return dealer;
 	}
 	
-	public Player getPlayer() {
+	public Player player() {
 		return player;
 	}
 	
@@ -145,18 +138,19 @@ public class Blackjack {
 	 */
 	public void hitDealer() {
 		dealer.hit(deck.pop());
-		if (dealer.hasBust() || dealer.hasStand()) {
-			setGameState(GameState.END_HAND);
-		}
-		notifyObservers(DisplayState.HIT);
 	}
 	
 	/**
-	 * 
+	 * Give player card.
+	 * If added card makes player bust, move to next hand or
+	 * dealer's turn.
 	 */
 	public void hitPlayer() {
 		player.hit(deck.pop());
-		if (player.hasCurrentBust()) {
+		if (player.hasBlackjack()) {
+			setGameState(GameState.END_HAND);
+			endgame(true);
+		} else if (player.hasCurrentBust() || player.has21()) {
 			if (player.hasNextHand()) {
 				player.nextHand(deck.pop());
 			} else {
@@ -206,5 +200,37 @@ public class Blackjack {
 			notifyObservers(DisplayState.SPLIT);
 		}
 		return valid;
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param blackjack {@code true} if player got blackjack
+	 */
+	public void endgame(boolean blackjack) {
+		if (blackjack) {
+			player.win((int) (player.currentBet() * 5.0/2.0));
+			notifyObservers(DisplayState.BLACKJACK_WIN);
+		} else {
+			for (Hand hand : player.hands()) {
+				if (hand.hasBust()) {
+					notifyObservers(DisplayState.PLAYER_BUST);
+				} else if (dealer.hasBust()) {
+					player.win(player.currentBet() * 2); // multiply by 2 to get back initial bet
+					notifyObservers(DisplayState.PLAYER_WIN);
+				} else {
+					if (hand.getValue() > dealer.showingValue()) {
+						player.win(player.currentBet() * 2);
+						notifyObservers(DisplayState.PLAYER_WIN);
+					} else if (dealer.showingValue() > hand.getValue()) {
+						notifyObservers(DisplayState.DEALER_WIN);
+					} else {
+						player.win(player.currentBet());
+						notifyObservers(DisplayState.PUSH);
+					}
+				}
+			}
+		}
+		setGameState(GameState.BET);
 	}
 }

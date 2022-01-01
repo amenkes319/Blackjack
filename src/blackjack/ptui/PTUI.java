@@ -36,9 +36,10 @@ public class PTUI implements Observer<DisplayState> {
         		switch (model.getGameState()) {
 				case BET:
 					model.reset();
-					System.out.println("\nNew Hand:");
+					System.out.println("New Hand:");
 					int bet;
 					do {
+						System.out.println("Balance: " + model.player().getBalance());
 						System.out.println("Please enter your bet: ");
 						System.out.print("> ");
 						System.out.flush();
@@ -81,23 +82,19 @@ public class PTUI implements Observer<DisplayState> {
 	                }
 					break;
 				case DEALER_TURN:
-					if (model.getPlayer().hasBust()) {
+					if (model.player().hasBust()) {
 						model.setGameState(GameState.END_HAND);
 					} else {
-						model.hitDealer();
+						if (model.dealer().hasBust() || model.dealer().hasStand()) {
+							model.setGameState(GameState.END_HAND);
+						} else {
+							model.hitDealer();
+							model.notifyObservers(DisplayState.HIT);
+						}
 					}
 					break;
 				case END_HAND:
-					if (model.getPlayer().hasBust()) {
-						System.out.println("PLAYER BUST, DEALER WINS");
-					} else { // multiple hands / player not bust
-						if (model.getDealer().hasBust()) {
-							// any player hands not busted wins
-						} else {
-							// compare all hands to dealer
-						}
-					}
-					model.setGameState(GameState.BET);
+					model.endgame(false);
 					break;
         		}
             }
@@ -106,26 +103,45 @@ public class PTUI implements Observer<DisplayState> {
 	
 	@Override
 	public void update(DisplayState data) {
-		System.out.println("\n" + model.getDealer());
-		System.out.println("\n" + model.getPlayer());
-//		switch (data) {
-//		case DEAL:
-//			System.out.println(model.getDealer());
-//			System.out.println("\n" + model.getPlayer());
-//			break;
-//		case DOUBLE:
-//			
-//			break;
-//		case HIT:
-//			
-//			break;
-//		case SPLIT:
-//			
-//			break;
-//		case STAND:
-//			
-//			break;
-//		}
+		System.out.println();
+		switch (data) {
+		case DEAL:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
+			break;
+		case DOUBLE:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
+			break;
+		case HIT:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
+			break;
+		case SPLIT:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
+			break;
+		case STAND:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
+			break;
+		case PUSH:
+			System.out.println("Push");
+			break;
+		case BLACKJACK_WIN:
+			System.out.println("BLACKJACK!");
+			break;
+		case PLAYER_WIN:
+			System.out.println("You win!");
+			break;
+		case PLAYER_BUST:
+			System.out.println("Bust");
+			break;
+		case DEALER_WIN:
+			System.out.println("Dealer wins.");
+			break;
+		}
+		System.out.println();
 	}
 	
 	private void error(String message, boolean critical) {

@@ -1,27 +1,17 @@
 package blackjack.game;
 
 import java.util.LinkedList;
+import java.util.List;
 
 public class Player {
 	
 	/** 
 	 * List of hands the player currently holds.
 	 * Size is only greater than 1 if the player splits
-	 * */
-	private LinkedList<Hand> hands;
+	 */
+	private List<Hand> hands;
 	private int currentIndex;
 	private int balance;
-
-	/**
-	 * Creates new instance of player with balance of 0
-	 */
-	public Player() {
-		hands = new LinkedList<Hand>();
-		hands.add(new Hand());
-		hands.iterator().next();
-		currentIndex = 0;
-		balance = 0;
-	}
 	
 	/**
 	 * Creates new instance of player with predetermined balance
@@ -29,19 +19,53 @@ public class Player {
 	 * @param balance Starting balance of player
 	 */
 	public Player(int balance) {
-		this();
+		hands = new LinkedList<Hand>();
+		hands.add(new Hand());
+		currentIndex = 0;
 		this.balance = balance;
 	}
 	
 	/**
-	 * Set bet for current hand.
+	 * Creates new instance of player with balance of 0
+	 */
+	public Player() {
+		this(0);
+	}
+	
+	public List<Hand> hands() {
+		return hands;
+	}
+	
+	public int getBalance() {
+		return balance;
+	}
+	
+	/**
+	 * Bet for current hand.
 	 * 
 	 * @param amount Amount to bet.
+	 * @param addBet {@code true} if bet should be added to current bet, 
+	 * 				 false if bet should be set to amount.
 	 * @return {@code true} if the bet is valid.
 	 */
-	public boolean bet(int amount) {
+	public boolean bet(int amount, boolean addBet) {
+		return bet(amount, addBet, currentIndex);
+	}
+	
+	/**
+	 * Bet for given hand.
+	 * 
+	 * @param amount Amount to bet.
+	 * @param addBet {@code true} if bet should be added to current bet, 
+	 * 				 false if bet should be set to amount.
+	 * @param index Index of hand in list
+	 * @return {@code true} if the bet is valid.
+	 */
+	private boolean bet(int amount, boolean addBet, int index) {
 		if (0 < amount && amount <= balance) {
-			hands.get(currentIndex).setBet(amount);
+			hands.get(index).setBet(amount + (addBet ? hands.get(index).getBet() : 0));
+			balance -= amount;
+			System.out.println(balance);
 			return true;
 		}
 		return false;
@@ -58,11 +82,12 @@ public class Player {
 	
 	/**
 	 * Gets whether the current hand busted
+	 * Different from {@code hasBust()}
 	 * 
 	 * @return {@code true} if the current hand busted
 	 */
 	public boolean hasCurrentBust() {
-		return hands.get(currentIndex).isBust();
+		return hands.get(currentIndex).hasBust();
 	}
 	
 	/**
@@ -73,7 +98,7 @@ public class Player {
 	 */
 	public boolean hasBust() {
 		for (Hand hand : hands) {
-			if (!hand.isBust()) {
+			if (!hand.hasBust()) {
 				return false;
 			}
 		}
@@ -118,9 +143,10 @@ public class Player {
 		if (hands.get(currentIndex).size() == 2) {
 			Card c1 = hands.get(currentIndex).getCards().get(0);
 			Card c2 = hands.get(currentIndex).getCards().get(1);
-			if (c1.equals(c2)) {
+			if (c1.equals(c2) && currentBet() <= balance) {
 				if (hands.get(currentIndex).removeCard(c1)) {
 					hands.add(currentIndex + 1, new Hand(c1));
+					bet(currentBet(), false, currentIndex + 1);
 					return true;
 				}
 			}
@@ -135,11 +161,44 @@ public class Player {
 	 * @return {@code true} if the double was successful
 	 */
 	public boolean doubleDown(Card card) {
-		if (hands.get(currentIndex).size() == 2) {
+		if (hands.get(currentIndex).size() == 2 && currentBet() <= balance) {
 			hit(card);
+			bet(currentBet(), true);
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Get the bet on the current hand
+	 * 
+	 * @return Bet on current hand
+	 */
+	public int currentBet() {
+		return hands.get(currentIndex).getBet();
+	}
+	
+	/**
+	 * Add money to player's balance
+	 * 
+	 * @param amount Amount to add
+	 */
+	public void win(int amount) {
+		balance += amount;
+	}
+	
+	/**
+	 * @return {@code true} if player has blackjack
+	 */
+	public boolean hasBlackjack() {
+		return hands.size() == 1 && hands.get(currentIndex).size() == 2 && has21();
+	}
+	
+	/**
+	 * @return {@code true} if current hand's value is 21 (Not blackjack)
+	 */
+	public boolean has21() {
+		return hands.get(currentIndex).getValue() == 21;
 	}
 	
 	/**

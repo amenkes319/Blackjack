@@ -20,7 +20,7 @@ public class Dealer {
 	 * 
 	 */
 	public void resetHand() {
-		hand = new Hand();
+		hand.clearHand();
 	}
 	
 	/**
@@ -37,7 +37,7 @@ public class Dealer {
 	 * @return
 	 */
 	public boolean hasBust() {
-		return hand.isBust();
+		return hand.hasBust();
 	}
 	
 	/**
@@ -45,18 +45,18 @@ public class Dealer {
 	 * @return
 	 */
 	public boolean hasStand() {
-		return hand.getValue() >= 17 && !hand.isSoft() ||
-			   hand.getValue() >= 18 && hand.isSoft() && !hand.isBust();
+		return !hand.isSoft() && hand.getValue() >= 17 ||
+				hand.isSoft() && hand.getValue() >= 18 && !hand.hasBust();
 	}
 	
 	/**
-	 * Gets the value of the showing cards only.
+	 * Gets the value of the showing card(s) only.
 	 * The one shown card if not the dealers turn yet,
 	 * total of cards if all showing.
 	 * 
 	 * @return Total value of face up cards.
 	 */
-	private int showingValue() {
+	public int showingValue() {
 		int val = 0;
 		for (Card c : hand.getCards()) {
 			if (!c.isFaceDown()) {

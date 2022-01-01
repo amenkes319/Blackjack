@@ -17,7 +17,7 @@ public class Hand {
 	/**
 	 * The amount of money bet on this hand.
 	 * Will increase if player doubles.
-	 * -1 if dealer's hand.
+	 * -1 if no bet yet or dealer's hand.
 	 */
 	private int bet;
 	
@@ -115,6 +115,7 @@ public class Hand {
 	public void clearHand() {
 		cards.clear();
 		updateValue();
+		setBet(-1);
 	}
 
 	/**
@@ -122,7 +123,7 @@ public class Hand {
 	 * 
 	 * @return True if the value is over 21, false otherwise
 	 */
-	public boolean isBust() {
+	public boolean hasBust() {
 		return getValue() > 21;
 	}
 	
