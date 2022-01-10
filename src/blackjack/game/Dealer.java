@@ -49,6 +49,10 @@ public class Dealer {
 				hand.isSoft() && hand.getValue() >= 18 && !hand.hasBust();
 	}
 	
+	public boolean hasBlackjack() {
+		return hand.size() == 2 && hand.getValue() == 21;
+	}
+	
 	/**
 	 * Gets the value of the showing card(s) only.
 	 * The one shown card if not the dealers turn yet,

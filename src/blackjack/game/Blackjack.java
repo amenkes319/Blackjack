@@ -7,7 +7,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import blackjack.game.Blackjack.GameState;
 import blackjack.util.Observer;
 
 /**
@@ -19,11 +18,11 @@ public class Blackjack {
 	
 	/** Represents the state of each round */
 	public enum GameState {
-		BET, PLAYER_TURN, DEALER_TURN, END_HAND
+		BET, DEAL, PLAYER_TURN, DEALER_TURN, END_HAND
 	}
 	
 	/** Used by observers as Subject data */
-	public enum DisplayState {
+	public enum Display {
 		DEAL, HIT, STAND, SPLIT, DOUBLE, PUSH, BLACKJACK_WIN, PLAYER_BUST, PLAYER_WIN, DEALER_WIN
 	}
 
@@ -35,7 +34,7 @@ public class Blackjack {
 	private Dealer dealer;
 	private Player player;
 	private GameState state;
-	private List<Observer<DisplayState>> observers;
+	private List<Observer<Display>> observers;
 	private Deque<Card> deck;
 	
 	public Blackjack() {
@@ -66,15 +65,15 @@ public class Blackjack {
 		return new ArrayDeque<>(deck);
 	}
 	
-	public void addObserver(Observer<DisplayState> observer) {
+	public void addObserver(Observer<Display> observer) {
         observers.add(observer);
     }
 	
 	/**
 	 * Update all observers
 	 */
-	public void notifyObservers(DisplayState data) {
-		for (Observer<DisplayState> observer : observers) {
+	public void notifyObservers(Display data) {
+		for (Observer<Display> observer : observers) {
 			observer.update(data);
 		}
 	}
@@ -99,12 +98,21 @@ public class Blackjack {
 	 * Deal cards out to player and dealer
 	 */
 	public void deal() {
-		state = GameState.PLAYER_TURN;
-		player.hit(deck.pop());
-		dealer.hit(deck.pop().setFaceDown(true));
-		player.hit(deck.pop());
-		dealer.hit(deck.pop());
-		notifyObservers(DisplayState.DEAL);
+		setGameState(GameState.DEAL);
+		hitPlayer();
+		hitDealer(true);
+		hitPlayer();
+		hitDealer(false);
+		
+		if (!player.hasBlackjack()) {
+			if (dealer.hasBlackjack()) {
+				setGameState(GameState.END_HAND);
+			} else {
+				setGameState(GameState.PLAYER_TURN);
+			}
+		}
+		
+		notifyObservers(Display.DEAL);
 	}
 	
 	/**
@@ -128,36 +136,47 @@ public class Blackjack {
 	
 	public void setGameState(GameState state) {
 		this.state = state;
-		if (state == GameState.DEALER_TURN) {
+		if (state == GameState.DEALER_TURN || state == GameState.END_HAND) {
 			showDealerCards();
 		}
 	}
 	
 	/**
+	 * Deal card to dealer.
 	 * 
+	 * @param faceDown {@code true} if the card should be dealt face down to dealer
 	 */
-	public void hitDealer() {
-		dealer.hit(deck.pop());
+	public void hitDealer(boolean faceDown) {
+		dealer.hit(deck.pop().setFaceDown(faceDown));
+	}
+	
+	/**
+	 * hit player with top card of deck.
+	 */
+	public void hitPlayer() {
+		hitPlayer(deck.pop());
 	}
 	
 	/**
 	 * Give player card.
 	 * If added card makes player bust, move to next hand or
 	 * dealer's turn.
+	 * 
+	 * @param card Card to give player
 	 */
-	public void hitPlayer() {
-		player.hit(deck.pop());
-		if (player.hasBlackjack()) {
-			setGameState(GameState.END_HAND);
-			endgame(true);
-		} else if (player.hasCurrentBust() || player.has21()) {
+	private void hitPlayer(Card card) {
+		player.hit(card);
+		if (player.hasCurrentBust() || player.has21()) {
 			if (player.hasNextHand()) {
 				player.nextHand(deck.pop());
 			} else {
 				setGameState(GameState.DEALER_TURN);
 			}
 		}
-        notifyObservers(DisplayState.HIT);
+
+		if (state != GameState.DEAL) {
+			notifyObservers(Display.HIT);
+		}
 	}
 	
 	/**
@@ -169,7 +188,7 @@ public class Blackjack {
 		} else {
 			setGameState(GameState.DEALER_TURN);
 		}
-		notifyObservers(DisplayState.STAND);
+		notifyObservers(Display.STAND);
 	}
 	
 	/**
@@ -183,7 +202,7 @@ public class Blackjack {
 			} else {
 				setGameState(GameState.DEALER_TURN);
 			}
-            notifyObservers(DisplayState.DOUBLE);
+            notifyObservers(Display.DOUBLE);
 		}
 		return valid;
 	}
@@ -197,36 +216,36 @@ public class Blackjack {
 		boolean valid = player.split();
 		if (valid) {
 			player.hit(deck.pop());
-			notifyObservers(DisplayState.SPLIT);
+			notifyObservers(Display.SPLIT);
 		}
 		return valid;
 	}
 	
 	/**
-	 * 
+	 * Calculates winnings/losings for player by comparing player's hands to dealer
 	 * 
 	 * @param blackjack {@code true} if player got blackjack
 	 */
-	public void endgame(boolean blackjack) {
-		if (blackjack) {
+	public void endgame() {
+		if (player.hasBlackjack() && !dealer.hasBlackjack()) {
 			player.win((int) (player.currentBet() * 5.0/2.0));
-			notifyObservers(DisplayState.BLACKJACK_WIN);
+			notifyObservers(Display.BLACKJACK_WIN);
 		} else {
 			for (Hand hand : player.hands()) {
 				if (hand.hasBust()) {
-					notifyObservers(DisplayState.PLAYER_BUST);
+					notifyObservers(Display.PLAYER_BUST);
 				} else if (dealer.hasBust()) {
 					player.win(player.currentBet() * 2); // multiply by 2 to get back initial bet
-					notifyObservers(DisplayState.PLAYER_WIN);
+					notifyObservers(Display.PLAYER_WIN);
 				} else {
 					if (hand.getValue() > dealer.showingValue()) {
 						player.win(player.currentBet() * 2);
-						notifyObservers(DisplayState.PLAYER_WIN);
+						notifyObservers(Display.PLAYER_WIN);
 					} else if (dealer.showingValue() > hand.getValue()) {
-						notifyObservers(DisplayState.DEALER_WIN);
+						notifyObservers(Display.DEALER_WIN);
 					} else {
 						player.win(player.currentBet());
-						notifyObservers(DisplayState.PUSH);
+						notifyObservers(Display.PUSH);
 					}
 				}
 			}

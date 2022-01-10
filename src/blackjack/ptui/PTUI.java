@@ -3,11 +3,11 @@ package blackjack.ptui;
 import java.util.Scanner;
 
 import blackjack.game.Blackjack;
-import blackjack.game.Blackjack.DisplayState;
+import blackjack.game.Blackjack.Display;
 import blackjack.game.Blackjack.GameState;
 import blackjack.util.Observer;
 
-public class PTUI implements Observer<DisplayState> {
+public class PTUI implements Observer<Display> {
 	
 	private Blackjack model;
 	
@@ -82,19 +82,21 @@ public class PTUI implements Observer<DisplayState> {
 	                }
 					break;
 				case DEALER_TURN:
-					if (model.player().hasBust()) {
+					if (model.player().hasBust() || model.player().hasBlackjack()) {
 						model.setGameState(GameState.END_HAND);
 					} else {
 						if (model.dealer().hasBust() || model.dealer().hasStand()) {
 							model.setGameState(GameState.END_HAND);
 						} else {
-							model.hitDealer();
-							model.notifyObservers(DisplayState.HIT);
+							model.hitDealer(false);
+							model.notifyObservers(Display.HIT);
 						}
 					}
 					break;
 				case END_HAND:
-					model.endgame(false);
+					model.endgame();
+					break;
+				default:
 					break;
         		}
             }
@@ -102,7 +104,7 @@ public class PTUI implements Observer<DisplayState> {
     }
 	
 	@Override
-	public void update(DisplayState data) {
+	public void update(Display data) {
 		System.out.println();
 		switch (data) {
 		case DEAL:
@@ -129,6 +131,8 @@ public class PTUI implements Observer<DisplayState> {
 			System.out.println("Push");
 			break;
 		case BLACKJACK_WIN:
+			System.out.println(model.dealer());
+			System.out.println("\n" + model.player());
 			System.out.println("BLACKJACK!");
 			break;
 		case PLAYER_WIN:
