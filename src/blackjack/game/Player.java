@@ -65,7 +65,6 @@ public class Player {
 		if (0 < amount && amount <= balance) {
 			hands.get(index).setBet(amount + (addBet ? hands.get(index).getBet() : 0));
 			balance -= amount;
-			System.out.println(balance);
 			return true;
 		}
 		return false;
