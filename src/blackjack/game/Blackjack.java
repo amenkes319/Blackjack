@@ -215,7 +215,8 @@ public class Blackjack {
 	public boolean split() {
 		boolean valid = player.split();
 		if (valid) {
-			player.hit(deck.pop());
+//			hitPlayer(deck.pop());
+			hitPlayer(new Card(Card.Rank.ACE_HIGH, Card.Suit.CLUBS));
 			notifyObservers(Display.SPLIT);
 		}
 		return valid;
