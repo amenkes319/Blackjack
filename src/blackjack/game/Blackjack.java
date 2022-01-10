@@ -180,7 +180,7 @@ public class Blackjack {
 	}
 	
 	/**
-	 * 
+	 * Move to next hand if player split, otherwise dealer's turn
 	 */
 	public void stand() {
 		if (player.hasNextHand()) {
@@ -192,7 +192,7 @@ public class Blackjack {
 	}
 	
 	/**
-	 * 
+	 * Double down if possible
 	 */
 	public boolean doubleDown() {
 		boolean valid = player.doubleDown(deck.pop());
@@ -222,7 +222,7 @@ public class Blackjack {
 	}
 	
 	/**
-	 * Calculates winnings/losings for player by comparing player's hands to dealer
+	 * Calculates winnings/losings for player by comparing player's hand(s) to dealer
 	 * 
 	 * @param blackjack {@code true} if player got blackjack
 	 */

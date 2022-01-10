@@ -105,7 +105,6 @@ public class PTUI implements Observer<Display> {
 	
 	@Override
 	public void update(Display data) {
-		System.out.println();
 		switch (data) {
 		case DEAL:
 			System.out.println(model.dealer());
